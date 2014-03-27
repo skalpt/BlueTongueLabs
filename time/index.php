@@ -1,3 +1,68 @@
+<?php
+    include("./includes/session.php");
+
+    // Save data if a post was just made
+    if($_POST) {
+        // Get parameters
+        $date = $_POST["input-date"];
+        $hours = $_POST["input-hours"];
+        $businessid = $_POST["select-business"];
+        $task = ucfirst($_POST["input-task"]);
+        $password = $_POST["input-password"];
+        
+        $query =
+        "
+            INSERT INTO time_Log (UserId, Date, Hours, BusinessId, Task)
+                VALUES
+                (
+                    $userid,
+                    '$date',
+                    $hours,
+                    $businessid,
+                    '$task'
+                );
+        ";
+        $result = mysql_query($query) or die("Error: " . mysql_error());
+    }
+
+    // Retrieve business units
+    $query =
+    "
+        SELECT
+            b.BusinessId,
+            b.Name
+        FROM
+            time_Business b
+        ORDER BY
+            b.BusinessId;
+    ";
+    $businesses = mysql_query($query) or die("Error: " . mysql_error());
+
+    // Retrieve last 5 log entries
+    $query =
+    "
+        SELECT
+            u.Username,
+            l.Date,
+            l.Hours,
+            b.Name AS 'Business',
+            l.Task
+        FROM
+            time_Log l
+                JOIN time_User u ON
+                    u.UserId = l.UserId
+                JOIN time_Business b ON
+                    b.BusinessId = l.BusinessId
+        WHERE
+            u.UserId = $userid
+        ORDER BY
+            l.LogId DESC
+        LIMIT
+            0, 5;
+    ";
+    $lastlogs = mysql_query($query) or die("Error: " . mysql_error());
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -11,9 +76,9 @@
     <!-- <link rel="stylesheet" href="https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/v0.1.1/jquery.mobile.datepicker.css" /> -->
     <link rel="stylesheet" href="./assets/css/add2home.css" />
     <style>
-        .ui-header .ui-title, .ui-footer .ui-title {
+        /* .ui-header .ui-title, .ui-footer .ui-title {
             margin: 0 5px;
-        }
+        } */
         
         .ui-btn span {
             text-align: left;
@@ -46,15 +111,7 @@
         } 
 
         $(document).ready( function() {
-            var d = new Date();
-            $('#input-date').val(d.getFullYear() + '-' + ('0' + (d.getMonth()+1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2));
-            
-            var userId = getCookie("userId");
-            if (userId != "") { $('#select-user').val(userId).selectmenu("refresh"); }
-            
-            var businessId = getCookie("businessId");
-            if (businessId != "") { $('#select-business').val(businessId).selectmenu("refresh"); }
-            
+        
             <?php if($_POST) { ?>
                 $("#collapsible-lastlogs").collapsible("option", "collapsed", false);
                 $("#table-lastlogs tbody tr:first").effect("highlight", {}, 3000);
@@ -64,105 +121,24 @@
                 setTimeout(function() {
                     $("#table-lastlogs tbody tr:first").animate({backgroundColor: "rgba(0, 0, 0, 0.04)"}, 1000);
                 }, 3000); */
+            
+                setCookie("businessId",<?php echo $businessid; ?>,365);
             <?php } ?>
+
+            var d = new Date();
+            $('#input-date').val(d.getFullYear() + '-' + ('0' + (d.getMonth()+1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2));
+            
+            var businessId = getCookie("businessId");
+            if (businessId != "") { $('#select-business').val(businessId).selectmenu("refresh"); }
         });
     </script>
 </head>
 <body>
-	<?php
-        // Connect to SQL server and select database
-        $con = mysql_connect("localhost", "thenewd1_btl", "B1u3T0n6u3!") or die("Error: " . mysql_error());
-        $result = mysql_select_db("thenewd1_btl", $con) or die("Error: " . mysql_error());
-        
-		// Retrieve users
-		$query =
-		"
-			SELECT
-				u.UserId,
-				u.Username,
-				u.Password
-			FROM
-				time_User u
-			ORDER BY
-				u.UserId;
-		";
-		$users = mysql_query($query) or die("Error: " . mysql_error());
-
-		// Save data if a post was just made
-		if($_POST) {
-			// Get parameters
-			$userid = $_POST["select-user"];
-			$date = $_POST["input-date"];
-			$hours = $_POST["input-hours"];
-			$businessid = $_POST["select-business"];
-			$task = ucfirst($_POST["input-task"]);
-			$password = $_POST["input-password"];
-            
-            // Could validate the password here, or upon form submission
-    
-            $query =
-            "
-                INSERT INTO time_Log (UserId, Date, Hours, BusinessId, Task)
-                    VALUES
-                    (
-                        $userid,
-                        '$date',
-                        $hours,
-                        $businessid,
-                        '$task'
-                    );
-            ";
-			$result = mysql_query($query) or die("Error: " . mysql_error());
-    
-            ?>
-                <script>
-                    setCookie("userId",<?php echo $userid; ?>,365);
-                    setCookie("businessId",<?php echo $businessid; ?>,365);
-                </script>
-            <?php
-
-        }
-
-		// Retrieve business units
-		$query =
-		"
-			SELECT
-				b.BusinessId,
-				b.Name
-			FROM
-				time_Business b
-			ORDER BY
-				b.BusinessId;
-		";
-		$businesses = mysql_query($query) or die("Error: " . mysql_error());
-
-        // Retrieve last 5 log entries
-		$query =
-		"
-			SELECT
-				u.Username,
-				l.Date,
-                l.Hours,
-                b.Name AS 'Business',
-                l.Task
-			FROM
-				time_Log l
-                    JOIN time_User u ON
-                        u.UserId = l.UserId
-                    JOIN time_Business b ON
-                        b.BusinessId = l.BusinessId
-			ORDER BY
-				l.LogId DESC
-            LIMIT
-                0, 5;
-		";
-		$lastlogs = mysql_query($query) or die("Error: " . mysql_error());
-?>
-
     <div data-role="page">
     
         <div data-role="header">
             <h1>BlueTongue Time Logger</h1>
+            <a href="logout.php" data-role="button" data-ajax="false" data-shadow="false" class="ui-btn-right">Logout</a> 
         </div><!-- /header -->
 
         <div role="main" class="ui-content">
@@ -208,23 +184,6 @@
             </div>
 
             <form method="post" data-ajax="false">
-                <div class="ui-field-contain">
-                    <label for="select-user">Name:</label>
-                    <select name="select-user" id="select-user" title="Name">
-						<option value="-1">Select your name</option>
-						<?php
-							// Add names to drop-down
-							while($row = mysql_fetch_array($users))
-							{
-								$userid = $row["UserId"];
-								$username = $row["Username"];
-								echo "<option value='" . $userid . "'>";
-								echo $username . "</option>";
-							}
-                            mysql_data_seek($users, 0);
-						?>
-                    </select>
-                </div>
 
                 <div class="ui-field-contain">
                     <label for="input-date">Date:</label>
@@ -286,17 +245,6 @@
                         required>
                 </div>
 
-                <div class="ui-field-contain">
-                    <label for="input-password">Password:</label>
-                    <input
-                        name="input-password"
-                        id="input-password"
-                        type="password"
-                        title="Password"
-                        data-clear-btn="true"
-                        required>
-                </div>
-                
                 <button name="submit" id="submit" type="submit" class="ui-shadow ui-btn ui-corner-all ui-mini">Submit</button>
                 
             </form>
@@ -305,7 +253,7 @@
         <div data-role="footer">
             <h4></h4>
         </div><!-- /footer -->
-    </div><!-- /page -->
 
+    </div><!-- /page -->
 </body>
 </html>
