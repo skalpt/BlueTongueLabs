@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BlueTongue Time Logger</title>
+
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
+    <!-- <link rel="stylesheet" href="https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/v0.1.1/jquery.mobile.datepicker.css" /> -->
+    <link rel="stylesheet" href="./assets/css/add2home.css">
+    <style>
+        .ui-header .ui-title, .ui-footer .ui-title {
+            margin: 0 5px;
+        }
+        
+        .ui-btn span {
+            text-align: left;
+            font-weight: normal;
+        }
+    </style>
+    
+    <script type="application/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script type="application/javascript" src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+    <!-- <script type="application/javascript" src="https://rawgithub.com/jquery/jquery-ui/1.10.4/ui/jquery.ui.datepicker.js"></script>
+    <script id="mobile-datepicker" type="application/javascript" src="https://rawgithub.com/arschmitz/jquery-mobile-datepicker-wrapper/v0.1.1/jquery.mobile.datepicker.js"></script></head> -->
+    <script type="application/javascript" src="./assets/js/add2home.js"></script>
+    <script>
+        Date.prototype.toDateInputValue = (function() {
+            var d = new Date(this);
+            function pad(s) { return (s < 10) ? '0' + s : s; }
+            return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/');
+        });
+        
+        $(document).ready( function() {
+            $('#input-date').val(new Date().toDateInputValue());
+        });
+    </script>
+</head>
+<body>
+
+    <div data-role="page">
+    
+        <div data-role="header">
+            <h1>BlueTongue Time Logger</h1>
+        </div><!-- /header -->
+
+        <div role="main" class="ui-content">
+            <form method="post">
+                <div class="ui-field-contain">
+                    <label for="select-name">Name:</label>
+                    <select
+                        name="select-name"
+                        id="select-name"
+                        title="Who">
+                        <option value="1">Julian</option>
+                        <option value="2">Gemma</option>
+                        <option value="3">Damien</option>
+                        <option value="4">Naydeen</option>
+                        <option value="5">Tim</option>
+                    </select>
+                </div>
+
+                <div class="ui-field-contain">
+                    <label for="input-date">Date:</label>
+                    <input
+                        name="input-date"
+                        id="input-date"
+                        type="date"
+                        title="Date (dd/mm/yyyy)"
+                        placeholder="e.g. 01/01/2000"
+                        pattern="(?:(?:0[1-9]|1[0-9]|2[0-9])/(?:0[1-9]|1[0-2])|(?:30)/(?:(?!02)(?:0[1-9]|1[0-2]))|(?:31)/(?:0[13578]|1[02]))/(?:2)[0-9]{3}"
+                        data-clear-btn="true"
+                        required>
+                </div>
+
+                <div class="ui-field-contain">
+                    <label for="input-hours">Hours:</label>
+                    <input
+                        name="input-hours"
+                        id="input-hours"
+                        type="number"
+                        title="Hours (#.#)"
+                        placeholder="e.g. 1.5"
+                        pattern="[0-9]*[.]?[0-9]+"
+                        data-clear-btn="true"
+                        required>
+                </div>
+
+                <div class="ui-field-contain">
+                    <label for="select-business">Business:</label>
+                    <select
+                        name="select-business"
+                        id="select-business"
+                        title="Business">
+                        <option value="1">BlueTongue Labs</option>
+                        <option value="2">BlueTongue Kids</option>
+                        <option value="3">BlueTongue Events</option>
+                        <option value="4">BlueTongue Media</option>
+                    </select>
+                </div>
+                
+                <div class="ui-field-contain">
+                    <label for="input-task">Task:</label>
+                    <input
+                        name="input-task"
+                        id="input-task"
+                        type="text"
+                        title="Task"
+                        placeholder="e.g. Researching themed decoration providers"
+                        data-clear-btn="true"
+                        required>
+                </div>
+
+                <div class="ui-field-contain">
+                    <label for="input-password">Password:</label>
+                    <input
+                        name="input-password"
+                        id="input-password"
+                        type="password"
+                        title="Password"
+                        data-clear-btn="true"
+                        required>
+                </div>
+                
+                <button name="submit" id="submit" type="submit" class="ui-shadow ui-btn ui-corner-all ui-mini">Submit</button>
+            </form>
+        </div><!-- /content -->
+    
+        <div data-role="footer">
+            <h4></h4>
+        </div><!-- /footer -->
+    </div><!-- /page -->
+
+</body>
+</html>
