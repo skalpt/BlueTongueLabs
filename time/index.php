@@ -6,37 +6,41 @@
         // Get parameters
         $date = $_POST["input-date"];
         $hours = $_POST["input-hours"];
-        $businessid = $_POST["select-business"];
+        $projectid = $_POST["select-project"];
         $task = ucfirst($_POST["input-task"]);
         $password = $_POST["input-password"];
         
         $query =
         "
-            INSERT INTO time_Log (UserId, Date, Hours, BusinessId, Task)
+            INSERT INTO time_Log (UserId, Date, Hours, ProjectId, Task)
                 VALUES
                 (
                     $userid,
                     '$date',
                     $hours,
-                    $businessid,
+                    $projectid,
                     '$task'
                 );
         ";
         $result = mysql_query($query) or die("Error: " . mysql_error());
     }
 
-    // Retrieve business units
+    // Retrieve project details
     $query =
     "
         SELECT
-            b.BusinessId,
-            b.Name
+            p.ProjectId,
+            b.Name AS 'Business',
+            p.Name AS 'Project'
         FROM
-            time_Business b
+            time_Project p
+            JOIN time_Business b ON
+                b.BusinessId = p.BusinessId
         ORDER BY
-            b.BusinessId;
+            b.BusinessId,
+            p.ProjectId;
     ";
-    $businesses = mysql_query($query) or die("Error: " . mysql_error());
+    $projects = mysql_query($query) or die("Error: " . mysql_error());
 
     // Retrieve last 5 log entries
     $query =
@@ -46,13 +50,16 @@
             l.Date,
             l.Hours,
             b.Name AS 'Business',
+            p.Name AS 'Project',
             l.Task
         FROM
             time_Log l
                 JOIN time_User u ON
                     u.UserId = l.UserId
-                JOIN time_Business b ON
-                    b.BusinessId = l.BusinessId
+                JOIN time_Project p ON
+                    p.ProjectId = l.ProjectId
+                    JOIN time_Business b ON
+                        b.BusinessId = p.BusinessId
         WHERE
             u.UserId = $userid
         ORDER BY
@@ -122,14 +129,14 @@
                     $("#table-lastlogs tbody tr:first").animate({backgroundColor: "rgba(0, 0, 0, 0.04)"}, 1000);
                 }, 3000); */
             
-                setCookie("businessId",<?php echo $businessid; ?>,365);
+                setCookie("projectId",<?php echo $projectid; ?>,365);
             <?php } ?>
 
             var d = new Date();
             $('#input-date').val(d.getFullYear() + '-' + ('0' + (d.getMonth()+1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2));
             
-            var businessId = getCookie("businessId");
-            if (businessId != "") { $('#select-business').val(businessId).selectmenu("refresh"); }
+            var projectId = getCookie("projectId");
+            if (projectId != "") { $('#select-project').val(projectId).selectmenu("refresh"); }
         });
     </script>
 </head>
@@ -153,7 +160,8 @@
                             <th data-priority="2">Date</th>
                             <th data-priority="3">Hours</th>
                             <th data-priority="4">Business</th>
-                            <th data-priority="5">Task</th>
+                            <th data-priority="5">Project</th>
+                            <th data-priority="6">Task</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -165,6 +173,7 @@
                                 $mysqldate = strtotime($row["Date"]);
                                 $hours = $row["Hours"];
                                 $business = $row["Business"];
+                                $project = $row["Project"];
                                 $task = $row["Task"];
                                 
                                 $phpdate = date("d/m/Y", $mysqldate);
@@ -174,6 +183,7 @@
                                     echo "<td>" . $phpdate . "</td>";
                                     echo "<td>" . (float)$hours . "</td>";
                                     echo "<td>" . $business . "</td>";
+                                    echo "<td>" . $project . "</td>";
                                     echo "<td>" . $task . "</td>";
                                 echo "</tr>";
                             }
@@ -213,22 +223,33 @@
                 </div>
 
                 <div class="ui-field-contain">
-                    <label for="select-business">Business:</label>
+                    <label for="select-project">Project:</label>
                     <select
-                        name="select-business"
-                        id="select-business"
-                        title="Business">
-						<option value="-1">Select business unit</option>
+                        name="select-project"
+                        id="select-project"
+                        title="project">
+						<option value="-1">Select project</option>
 						<?php
-							// Add business units to drop-down
-							while($row = mysql_fetch_array($businesses))
+							// Add projects to drop-down
+							$curbus = null;
+							while($row = mysql_fetch_array($projects))
 							{
-								$businessid = $row["BusinessId"];
-								$businessname = $row["Name"];
-								echo "<option value='" . $businessid . "'>";
-								echo $businessname . "</option>";
+								$projectid = $row["ProjectId"];
+								$business = $row["Business"];
+                                $project = $row["Project"];
+                                
+								if ($business != $curbus)
+								{
+									if ($curbus) echo "</optgroup>";
+									echo "<optgroup label='" . $business . "'>";
+									$curbus = $business;
+								}
+                                
+								echo "<option value='" . $projectid . "'>";
+								echo $project . "</option>";
 							}
-                            mysql_data_seek($businesses, 0);
+							if ($curbus) echo "</optgroup>";
+                            mysql_data_seek($projects, 0);
 						?>
                     </select>
                 </div>

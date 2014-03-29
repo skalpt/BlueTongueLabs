@@ -1,3 +1,6 @@
 The php example that I used to create the login logic: http://sidelang.blogspot.com.au/2013/04/php-login-page-example.html
 Interesting article on PHP sessions and their security: http://stackoverflow.com/questions/7616265/session-injection
-NIce jquery mobile authentication code with demo: http://www.raymondcamden.com/index.cfm/2011/4/3/Example-of-jQuery-Mobile-site-using-authentication--first-round
+Nice jquery mobile authentication code with demo: http://www.raymondcamden.com/index.cfm/2011/4/3/Example-of-jQuery-Mobile-site-using-authentication--first-round
+jquery cookies - could be useful: http://stackoverflow.com/questions/1959455/how-to-store-an-array-in-jquery-cookie
+qaptcha, a slider captcha: http://www.myjqueryplugins.com/jquery-plugin/qaptcha
+Sencha touch: http://cdn.sencha.com/touch/sencha-touch-2.3.1a/built-examples/kitchensink/index.html#
